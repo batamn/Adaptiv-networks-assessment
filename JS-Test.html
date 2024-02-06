@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Difference Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        input {
+            margin-bottom: 5px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="datetime-local"] {
+            margin-bottom: 10px;
+        }
+
+        div {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form id="dateForm">
+        <label for="date1">Date 1:</label>
+        <input type="datetime-local" id="date1" value="" onfocus="setOldValue(this)" oldValue="">
+        <label for="date2">Date 2:</label>
+        <input type="datetime-local" id="date2" value="" onfocus="setOldValue(this)" oldValue="">
+        <label for="backgroundColor">Background Color:</label>
+        <input type="color" id="backgroundColor" value="#ffffff" onchange="changeBackgroundColor()"
+            onfocus="setOldValue(this)" oldValue="">
+        <label for="textColor">Text Color:</label>
+        <input type="color" id="textColor" value="#000000" onchange="changeTextColor()" onfocus="setOldValue(this)"
+            oldValue="">
+    </form>
+
+    <div id="result"></div>
+    <div id="dateTracking"></div>
+    <div id="backgroundColorTracking"></div>
+    <div id="textColorTracking"></div>
+
+    <script>
+        var lastDateChange = {};
+        var lastColorChange = {};
+        function calculateDifference() {
+            var date1Input = document.getElementById('date1').value;
+            var date2Input = document.getElementById('date2').value;
+
+            var date1 = new Date(date1Input);
+            var date2 = new Date(date2Input);
+
+            if (!isNaN(date1.getTime()) && !isNaN(date2.getTime())) {
+                var difference = Math.abs(date2 - date1);
+
+                var seconds = Math.floor((difference / 1000) % 60);
+                var minutes = Math.floor((difference / (1000 * 60)) % 60);
+                var hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+                var days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                var months = Math.floor(days / 30);
+                var years = Math.floor(days / 365);
+
+                var result = document.getElementById('result');
+                result.innerHTML = "Difference: " + years + " years, " + months + " months, " + days + " days, " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds.";
+
+                var dateTrackingDiv = document.getElementById('dateTracking');
+                dateTrackingDiv.innerHTML = (lastDateChange.date1 || lastDateChange.date2) ? "Last date change: " + "date1: " + lastDateChange.date1 + " date2: " + lastDateChange.date2 : "";
+            } else {
+                var result = document.getElementById('result');
+                result.textContent = "Invalid dates. Please enter valid dates.";
+            }
+        }
+
+        function changeBackgroundColor() {
+            var backgroundColor = document.getElementById('backgroundColor').value;
+            var textColor = document.getElementById('textColor').value;
+
+            if (backgroundColor === textColor) {
+                document.getElementById('backgroundColor').value = lastColorChange.backgroundColor;
+                alert("The background and text colors cannot be the same. Please choose different colors.");
+                return;
+            }
+
+            document.body.style.backgroundColor = backgroundColor;
+            lastColorChange.color = backgroundColor;
+            var lastChangeDiv = document.getElementById('backgroundColorTracking');
+            lastChangeDiv.innerHTML = "Last background color change: " + lastColorChange.backgroundColor;
+        }
+
+        function changeTextColor() {
+            var backgroundColor = document.getElementById('backgroundColor').value;
+            var textColor = document.getElementById('textColor').value;
+
+            if (backgroundColor === textColor) {
+                document.getElementById('textColor').value = lastColorChange.textColor;
+                alert("The background and text colors cannot be the same. Please choose different colors.");
+                return;
+            }
+
+            document.body.style.color = textColor;
+            var lastChangeDiv = document.getElementById('textColorTracking');
+            lastChangeDiv.innerHTML = "Last text color change: " + lastColorChange.textColor;
+        }
+
+        // Stores previous values
+        function setOldValue(element) {
+            if (element.id === 'backgroundColor') {
+                lastColorChange = { ...lastColorChange, backgroundColor: element.value }
+            }
+            if (element.id === 'textColor') {
+                lastColorChange = { ...lastColorChange, textColor: element.value }
+            }
+            if (element.id === 'date1') {
+                lastDateChange = { ...lastDateChange, date1: element.value }
+            }
+            if (element.id === 'date2') {
+                lastDateChange = { ...lastDateChange, date2: element.value }
+            }
+
+        }
+        document.getElementById('date1').addEventListener('change', calculateDifference);
+        document.getElementById('date2').addEventListener('change', calculateDifference);
+
+        //initialize the current default values for date input fields with one day difference
+        var now = new Date();
+        document.getElementById('date1').value = now.toISOString().slice(0, 16);
+        var nextDay = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        document.getElementById('date2').value = nextDay.toISOString().slice(0, 16);
+
+        // Calculate the difference on page load
+        calculateDifference();
+    </script>
+
+</body>
+
+</html>
